@@ -67,9 +67,17 @@ def test_demo_upload_review_compare_prefer_and_scope(client):
     assert revised["history"][0]["fields"]["value"] == "4.2"
     assert review(client, uploaded, row, value="6.4").status_code == 409
 
-    result = ask(client, "What changed between V1 and V2?")
+    expected_potassium = [("V1", "4.2"), ("V2", "5.1")]
+    overview = ask(client, "What changed between V1 and V2?")
+    assert overview["status"] == "conflict"
+    assert [(c["version"], c["fields"]["value"]) for c in overview["citations"]
+            if c["fields"]["test"] == "Potassium"] == expected_potassium
+
+    # Other flagged rows may vary across Tesseract versions.
+    question = "What changed for potassium between V1 and V2?"
+    result = ask(client, question)
     assert result["mode"] == "extractive" and result["status"] == "conflict"
-    assert [(c["version"], c["fields"]["value"]) for c in result["citations"]] == [("V1", "4.2"), ("V2", "5.1")]
+    assert [(c["version"], c["fields"]["value"]) for c in result["citations"]] == expected_potassium
     citations = {c["version"]: c for c in result["citations"]}
     assert citations["V1"]["document_id"] == uploaded["id"]
     assert citations["V1"]["bbox"] == bbox
@@ -87,11 +95,11 @@ def test_demo_upload_review_compare_prefer_and_scope(client):
     preference = {"expected_revision": selected["revision"], "expected_document_version": "V2"}
     preferred = client.post(f"/api/rows/{selected['id']}/prefer", json=preference)
     assert preferred.status_code == 200 and preferred.json()["preferred"]
-    result = ask(client, "What changed between versions?")
+    result = ask(client, question)
     assert result["status"] == "resolved" and len(result["citations"]) == 2
     assert "reviewer selected V2" in result["lines"][0]["text"]
     assert review(client, v2, selected, value="5.2").status_code == 200
-    assert ask(client, "What changed between versions?")["status"] == "conflict"
+    assert ask(client, question)["status"] == "conflict"
 
 
 def test_unreadable_upload_gets_no_result_and_no_claim(client):

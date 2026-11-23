@@ -2,10 +2,9 @@
 
 **Review noisy lab reports and trace each answer to the exact spot on the original scan.** A faded digit can leave a result unreadable. A revised report can give the same test a different value. This app makes both cases visible to the reviewer.
 
-![12-second walkthrough showing a missing potassium value, a saved correction, and citations to V1 and V2](docs/media/walkthrough.gif)
+[**Try the interactive demo**](https://mahdibayanloo.github.io/clinical-document-intake-rag/) · [Three screenshots](#walkthrough) · [Run the full app](#run-the-full-app)
 
-<!-- After deploying Pages, add [Try the interactive demo](YOUR_PAGES_URL) to this link row. -->
-[Three screenshots](#walkthrough) · [Run the full app](#run-the-full-app) · [Publish the interactive demo](docs/publish.md)
+![12-second walkthrough showing a missing potassium value, a saved correction, and citations to V1 and V2](docs/media/walkthrough.gif)
 
 ## Walkthrough
 
@@ -62,4 +61,4 @@ python -m scripts.measure
 python -m scripts.build_portfolio
 ```
 
-The last command builds a self-contained browser replay at `portfolio-build/index.html`. The [GitHub Pages workflow](.github/workflows/pages.yml) publishes that replay.
+The last command builds a self-contained browser replay at `portfolio-build/index.html`. The [GitHub Pages workflow](.github/workflows/pages.yml) publishes that replay. See [publishing instructions](docs/publish.md) to deploy a copy.
