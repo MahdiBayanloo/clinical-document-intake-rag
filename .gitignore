@@ -1,0 +1,11 @@
+.venv/
+__pycache__/
+.pytest_cache/
+runtime/
+work/
+outputs/
+frontend/dist/
+frontend/node_modules/
+.env
+.DS_Store
+portfolio-build/

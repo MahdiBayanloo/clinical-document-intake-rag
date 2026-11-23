@@ -1,0 +1,240 @@
+<!doctype html>
+<html lang="en">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="theme-color" content="#102f30">
+<title>Clinical Document Intake · Interactive demo</title>
+<style>
+  :root { color-scheme: light; font: 16px/1.45 system-ui, -apple-system, sans-serif; color: #152d32;
+    background: #eef4f2; --ink: #152d32; --muted: #4b656a; --line: #d4e1de; --teal: #006259; }
+  * { box-sizing: border-box; }
+  body { margin: 0; }
+  h1, h2, p, figure { margin: 0; }
+  button, input { font: inherit; }
+  button { cursor: pointer; }
+  button:focus-visible, input:focus-visible { outline: 3px solid #278b7c; outline-offset: 3px; }
+  button:disabled { cursor: default; opacity: .55; }
+  .top { background: #102f30; color: #fff; }
+  .wrap { width: min(1100px, calc(100% - 52px)); margin: auto; }
+  .masthead { padding: 17px 0 21px; }
+  .tagline { font-size: 12px; font-weight: 750; letter-spacing: .105em; text-transform: uppercase; color: #8fe0cc; }
+  h1 { font-size: clamp(30px, 4.1vw, 50px); line-height: 1.06; letter-spacing: -.048em; margin: 6px 0 9px; }
+  .sub { color: #e0efeb; font-size: clamp(15px, 1.6vw, 17px); }
+  .steps { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin: 14px auto; }
+  .step { background: #fff; border: 1px solid var(--line); color: var(--ink); border-radius: 9px; padding: 9px 10px;
+    text-align: left; display: flex; align-items: center; gap: 9px; font-size: 14px; font-weight: 700; }
+  .step[aria-pressed="true"] { background: #d9eee7; border-color: #77ad9f; color: #00473e; }
+  .step span { display: grid; place-items: center; flex: 0 0 23px; height: 23px; border-radius: 5px;
+    color: #235b53; background: #e7f2ef; font-size: 12px; }
+  .step[aria-pressed="true"] span { background: #006259; color: white; }
+  .grid { display: grid; grid-template-columns: 1.06fr 1fr; align-items: start; gap: 14px; }
+  .card { background: #fff; border: 1px solid var(--line); border-radius: 13px; min-width: 0; overflow: hidden; }
+  .card-head { display: flex; justify-content: space-between; align-items: center; gap: 7px; padding: 12px 15px 10px; }
+  .card-head h2 { font-size: 17px; }
+  small, .small { color: var(--muted); font-size: 12px; }
+  .file { white-space: nowrap; font-variant-numeric: tabular-nums; }
+  .scan-bg { padding: 8px; background: #e8efed; margin: 0 12px; border-radius: 7px; }
+  .scan { position: relative; margin: auto; max-width: 560px; border: 1px solid #cbdad6; }
+  .scan img { width: 100%; height: auto; display: block; }
+  #overlay { position: absolute; background: #ffc24f36; outline: 2px solid #a45f00; pointer-events: none; }
+  #overlay.inferred { outline-style: dashed; }
+  figcaption { padding: 8px 15px 11px; min-height: 36px; }
+  #panel { min-height: 328px; padding: 16px; }
+  .eyebrow { display: inline-block; padding: 2px 7px; border-radius: 4px; background: #e2f0eb; color: #165849;
+    font-size: 11px; font-weight: 800; letter-spacing: .075em; text-transform: uppercase; }
+  .eyebrow.warning { background: #fff0d0; color: #764405; }
+  .eyebrow.conflict { background: #fbe8e2; color: #8d392a; }
+  #panel h2 { margin: 7px 0 5px; font-size: clamp(22px, 2.5vw, 28px); letter-spacing: -.034em; line-height: 1.12; }
+  .detail { color: var(--muted); font-size: 14px; }
+  table { width: 100%; border-collapse: collapse; text-align: left; margin: 10px 0; font-size: 14px; }
+  th { background: #eef5f3; color: var(--muted); font-size: 11px; text-transform: uppercase; letter-spacing: .06em; }
+  th, td { padding: 6px 8px; border-bottom: 1px solid #e4ecea; }
+  .focus-row { background: #fff5dd; font-weight: 700; }
+  .actions { display: flex; flex-wrap: wrap; gap: 7px; margin-top: 12px; }
+  .primary, .secondary { font-size: 13px; font-weight: 730; border-radius: 6px; padding: 7px 10px; }
+  .primary { background: #006259; color: #fff; border: 1px solid #006259; }
+  .primary:hover { background: #004d45; }
+  .secondary { background: #fff; color: #00564e; border: 1px solid #b8ceca; }
+  .secondary:hover, .citations button:hover { background: #eef6f2; }
+  .audit { margin-top: 9px; border: 1px solid var(--line); padding: 8px 9px; border-radius: 7px; font-size: 13px; }
+  .audit span { color: var(--muted); }
+  .review-label { display: block; font-size: 12px; font-weight: 700; margin-top: 10px; }
+  .value-input { width: 110px; border: 1px solid #9dbab3; border-radius: 6px; padding: 5px 8px; margin-top: 3px; }
+  #review-feedback { margin-top: 7px; color: #026151; font-size: 13px; font-weight: 700; }
+  .citations { display: grid; gap: 6px; margin: 10px 0 0; }
+  .citations button { width: 100%; display: flex; justify-content: space-between; align-items: baseline; gap: 6px;
+    text-align: left; border: 1px solid #c8dad5; background: #fff; border-radius: 7px; padding: 6px 8px; }
+  .citations button[aria-pressed="true"] { border-color: #7ca99f; background: #e4f3ee; }
+  .cite-label { font-size: 12px; color: #275d55; font-weight: 700; }
+  .number { font-size: 22px; font-weight: 790; letter-spacing: -.035em; white-space: nowrap; }
+  .unit { font-size: 12px; color: var(--muted); }
+  footer { margin: 13px 0; }
+  [hidden] { display: none !important; }
+  @media (max-width: 700px) {
+    .wrap { width: calc(100% - 24px); }
+    .grid { grid-template-columns: 1fr; }
+    .step { font-size: 12px; padding: 6px 5px; gap: 4px; }
+    .step span { flex-basis: 18px; height: 18px; }
+    #panel { min-height: 0; }
+  }
+</style>
+<header class="top">
+  <div class="wrap masthead">
+    <p class="tagline">Clinical Document Intake &amp; Evidence RAG</p>
+    <h1>From a noisy scan to a cited answer.</h1>
+    <p class="sub">Find the missing value. Preserve the correction. Compare the source reports.</p>
+  </div>
+</header>
+<main class="wrap">
+  <nav class="steps" aria-label="Walkthrough steps">
+    <button class="step" type="button" data-step="0"><span>1</span> Inspect scan</button>
+    <button class="step" type="button" data-step="1"><span>2</span> Review field</button>
+    <button class="step" type="button" data-step="2"><span>3</span> Compare versions</button>
+  </nav>
+  <div class="grid">
+    <figure class="card" id="source">
+      <div class="card-head"><h2>Original scan</h2><span id="filename" class="small file"></span></div>
+      <div class="scan-bg"><div class="scan">
+        <img id="scan" alt="">
+        <div id="overlay" aria-hidden="true"></div>
+      </div></div>
+      <figcaption class="small" id="caption" aria-live="polite"></figcaption>
+    </figure>
+    <section class="card" id="panel" aria-labelledby="step-title"></section>
+  </div>
+  <footer><p class="small">Interactive replay · Synthetic data · Captured from real OCR, review and Q&amp;A API responses.</p></footer>
+</main>
+<script type="application/json" id="replay"><!-- REPLAY_DATA --></script>
+<script>
+  const data = JSON.parse(document.querySelector('#replay').textContent);
+  const panel = document.querySelector('#panel');
+  const steps = [...document.querySelectorAll('[data-step]')];
+  const source = document.querySelector('#source');
+  const scan = document.querySelector('#scan');
+  const overlay = document.querySelector('#overlay');
+  const expected = data.correction.fields.value;
+  const versionButtons = () => panel.querySelectorAll('[data-citation]');
+  let reviewed = false;
+
+  function showScan(id, bbox, inferred = false) {
+    const report = data.reports[id];
+    scan.src = report.image;
+    scan.width = report.width;
+    scan.height = report.height;
+    scan.alt = 'Synthetic Northfield Lab scan, version ' + report.version;
+    document.querySelector('#filename').textContent = report.name + ' · p. 1';
+    const [left, top, width, height] = bbox;
+    overlay.style.left = 100 * left / report.width + '%';
+    overlay.style.top = 100 * top / report.height + '%';
+    overlay.style.width = 100 * width / report.width + '%';
+    overlay.style.height = 100 * height / report.height + '%';
+    overlay.classList.toggle('inferred', inferred);
+    document.querySelector('#caption').textContent = inferred
+      ? 'Dashed outline shows the expected potassium cell.'
+      : 'Highlighted region shows the OCR source on page 1.';
+  }
+
+  function renderInspect() {
+    panel.innerHTML = '<span class="eyebrow warning">Flagged for review</span>' +
+      '<h2 id="step-title"></h2><p class="detail" id="ocr-impact"></p>' +
+      '<table><thead><tr><th>Test</th><th>Value</th><th>Unit</th></tr></thead><tbody></tbody></table>' +
+      '<div class="actions"><button class="primary" type="button" data-next="1">Review flagged value →</button></div>';
+    const missed = !data.original.text;
+    panel.querySelector('#step-title').textContent = missed
+      ? 'OCR missed a potassium value.' : 'OCR flagged a potassium value.';
+    panel.querySelector('#ocr-impact').textContent = missed
+      ? 'The faded scan produced a gap in an otherwise structured result table.'
+      : 'A reading from the faded scan needs to be checked against the source.';
+    const body = panel.querySelector('tbody');
+    for (const row of data.rows) {
+      const tr = body.insertRow();
+      tr.classList.toggle('focus-row', row.test === 'Potassium');
+      for (const key of ['test', 'value', 'unit']) tr.insertCell().textContent = row[key] || '—';
+    }
+    showScan(data.degraded_id, data.original.bbox, data.original.inferred);
+  }
+
+  function renderReview() {
+    panel.innerHTML = '<span class="eyebrow">Human review</span>' +
+      '<h2 id="step-title">Keep OCR and correction together.</h2>' +
+      '<p class="detail">Inspect the highlighted source and enter the value in the scan.</p>' +
+      '<div class="audit"><span>Original OCR value</span> <strong id="original-value"></strong>' +
+      '<br><span>Raw row</span> <code id="raw-row"></code></div>' +
+      '<form id="review"><label class="review-label" for="review-value">Reviewed potassium (mmol/L)</label>' +
+      '<input class="value-input" id="review-value" type="text" inputmode="decimal" required>' +
+      '<div class="actions"><button class="secondary" id="fill" type="button">Use the value from the scan</button>' +
+      '<button class="primary" type="submit">Save correction</button></div></form>' +
+      '<p id="review-feedback" role="status"></p>' +
+      '<button class="secondary" type="button" data-next="2" id="compare" hidden>Compare report versions →</button>';
+    panel.querySelector('#original-value').textContent = data.original.raw_text || 'Blank';
+    panel.querySelector('#raw-row').textContent = data.raw_text;
+    const value = panel.querySelector('#review-value');
+    const feedback = panel.querySelector('#review-feedback');
+    const compare = panel.querySelector('#compare');
+    function saved() {
+      reviewed = true;
+      value.value = expected;
+      feedback.textContent = 'Correction recorded. Original OCR preserved.';
+      compare.hidden = false;
+    }
+    panel.querySelector('#fill').addEventListener('click', () => { value.value = expected; value.focus(); });
+    panel.querySelector('#review').addEventListener('submit', event => {
+      event.preventDefault();
+      if (value.value.trim() === expected) saved();
+      else feedback.textContent = 'This replay uses the verified value from the sample scan. Try the scan-value button.';
+    });
+    if (reviewed) saved();
+    showScan(data.degraded_id, data.original.bbox, data.original.inferred);
+  }
+
+  function renderCompare() {
+    panel.innerHTML = '<span class="eyebrow conflict">Conflicting values</span><h2 id="step-title"></h2>' +
+      '<p class="detail" id="conflict"></p><div class="citations" aria-label="Source citations"></div>' +
+      '<p class="small" style="margin-top:8px">Click either citation to open its location on the original scan.</p>';
+    panel.querySelector('#step-title').textContent = data.question;
+    panel.querySelector('#conflict').textContent = data.conflict;
+    const list = panel.querySelector('.citations');
+    data.citations.forEach((citation, index) => {
+      const button = document.createElement('button');
+      button.type = 'button';
+      button.dataset.citation = index;
+      const label = document.createElement('span');
+      label.className = 'cite-label';
+      label.textContent = '[' + (index + 1) + '] ' + citation.version + ' · ' +
+        (citation.status === 'corrected' ? 'Reviewed value' : 'Original report');
+      const reading = document.createElement('span');
+      const number = document.createElement('strong');
+      number.className = 'number';
+      number.textContent = citation.fields.value;
+      const unit = document.createElement('span');
+      unit.className = 'unit';
+      unit.textContent = ' ' + citation.fields.unit;
+      reading.append(number, unit);
+      button.append(label, reading);
+      list.append(button);
+    });
+    showCitation(0);
+  }
+
+  function showCitation(index, scroll = false) {
+    const citation = data.citations[index];
+    showScan(citation.document_id, citation.bbox, citation.inferred);
+    versionButtons().forEach((button, i) => button.setAttribute('aria-pressed', String(i === index)));
+    if (scroll && matchMedia('(max-width: 700px)').matches) source.scrollIntoView({ block: 'start' });
+  }
+
+  function showStep(step) {
+    steps.forEach((button, index) => button.setAttribute('aria-pressed', String(index === step)));
+    [renderInspect, renderReview, renderCompare][step]();
+  }
+
+  steps.forEach((button, index) => button.addEventListener('click', () => showStep(index)));
+  panel.addEventListener('click', event => {
+    const next = event.target.closest('[data-next]');
+    const cite = event.target.closest('[data-citation]');
+    if (next) showStep(Number(next.dataset.next));
+    if (cite) showCitation(Number(cite.dataset.citation), true);
+  });
+  showStep(0);
+</script>
+</html>

@@ -1,0 +1,108 @@
+{
+  "synthetic_patient": "Avery Example",
+  "reports": {
+    "clean-v1.png": {
+      "version": "V1",
+      "rows": [
+        {
+          "test": "Glucose",
+          "value": "98",
+          "unit": "mg/dL",
+          "date": "2025-02-17",
+          "version": "V1"
+        },
+        {
+          "test": "Potassium",
+          "value": "4.2",
+          "unit": "mmol/L",
+          "date": "2025-02-17",
+          "version": "V1"
+        },
+        {
+          "test": "Sodium",
+          "value": "140",
+          "unit": "mmol/L",
+          "date": "2025-02-17",
+          "version": "V1"
+        },
+        {
+          "test": "Creatinine",
+          "value": "0.91",
+          "unit": "mg/dL",
+          "date": "2025-02-17",
+          "version": "V1"
+        }
+      ]
+    },
+    "degraded-v1.jpg": {
+      "version": "V1",
+      "rows": [
+        {
+          "test": "Glucose",
+          "value": "98",
+          "unit": "mg/dL",
+          "date": "2025-02-17",
+          "version": "V1"
+        },
+        {
+          "test": "Potassium",
+          "value": "4.2",
+          "unit": "mmol/L",
+          "date": "2025-02-17",
+          "version": "V1"
+        },
+        {
+          "test": "Sodium",
+          "value": "140",
+          "unit": "mmol/L",
+          "date": "2025-02-17",
+          "version": "V1"
+        },
+        {
+          "test": "Creatinine",
+          "value": "0.91",
+          "unit": "mg/dL",
+          "date": "2025-02-17",
+          "version": "V1"
+        }
+      ]
+    },
+    "corrected-v2.png": {
+      "version": "V2",
+      "rows": [
+        {
+          "test": "Glucose",
+          "value": "98",
+          "unit": "mg/dL",
+          "date": "2025-02-17",
+          "version": "V2"
+        },
+        {
+          "test": "Potassium",
+          "value": "5.1",
+          "unit": "mmol/L",
+          "date": "2025-02-17",
+          "version": "V2"
+        },
+        {
+          "test": "Sodium",
+          "value": "140",
+          "unit": "mmol/L",
+          "date": "2025-02-17",
+          "version": "V2"
+        },
+        {
+          "test": "Creatinine",
+          "value": "0.91",
+          "unit": "mg/dL",
+          "date": "2025-02-17",
+          "version": "V2"
+        }
+      ]
+    },
+    "unreadable.png": {
+      "version": null,
+      "rows": []
+    }
+  }
+}
